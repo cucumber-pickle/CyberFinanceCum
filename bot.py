@@ -8,10 +8,9 @@ from core.info import game_data
 from core.task import process_check_in, process_do_task, process_watch_ads
 from core.claim import process_claim
 from core.boost import process_buy_boost
-
 import time
 import json
-import urllib.parse
+from urllib.parse import parse_qs
 
 
 def read_config():
@@ -22,6 +21,11 @@ def read_config():
             return json.loads(config_content)
         except json.JSONDecodeError as e:
             return {}
+
+def extract_user_name(auth_data: str) -> dict:
+    query_params = parse_qs(auth_data)
+    user_name = json.loads(query_params['user'][0]).get("username")
+    return user_name
 
 config = read_config()
 
@@ -63,8 +67,8 @@ class CyberFinanace:
 
             for no, (data, proxy_info) in enumerate(zip(accounts, proxies)):
                 base.log(self.line)
-                # Декодируем строку запроса
-                user_name = json.loads(urllib.parse.unquote(data).split('&')[0].split('=')[1]).get('username')
+
+                user_name = extract_user_name(data)
 
                 base.log(f"{base.green}Account number: {base.white}{no+1}/{num_acc}")
                 base.log(f"{base.green}User name: {base.white}{user_name}")
